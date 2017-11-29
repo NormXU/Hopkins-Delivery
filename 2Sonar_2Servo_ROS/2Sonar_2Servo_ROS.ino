@@ -1,4 +1,7 @@
-
+/*
+ * rosserial Publisher Example
+ * Prints "hello world!"
+ */
 #define SERIAL_CLASS Serial_
 #include <ros.h>
 #include<std_msgs/Int16.h>
@@ -24,14 +27,15 @@ long duration1, distance1;
 ros::NodeHandle  nh;
 
 std_msgs::Int16 str_msg1;
-ros::Publisher sonar1("sonar1", &str_msg1);
-
+ros::Publisher sonar("sonar", &str_msg1);
+//std_msgs::Int16 str_msg2;
+//ros::Publisher sonar2("sonar2", &str_msg2);
 
 
 void setup()
 {
   nh.initNode();
-  nh.advertise(sonar1);
+  nh.advertise(sonar);
   Serial.begin(9600);
   pinMode(trigPin, OUTPUT); // Trigger PIN
   pinMode(echoPin, INPUT); // Echo PIN
@@ -45,10 +49,14 @@ void loop()
   Servo_with_sonar();
    object_distance=calculateDistance();
    object_distance1=calculateDistance1();
-  str_msg1.data = object_distance,object_distance1;
-  sonar1.publish( &str_msg1 );
+  str_msg1.data = object_distance;
+  sonar.publish( &str_msg1 );
+   str_msg1.data = object_distance1;
+  sonar.publish( &str_msg1 );
+//   str_msg2.data = object_distance1;
+//  sonar2.publish( &str_msg2 );
   nh.spinOnce();
-  delay(1000);
+  delay(100);
 }
 
 // zi function
