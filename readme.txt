@@ -19,3 +19,7 @@ rosrun rosserial_python serial_node.py _port:=/dev/ttyACM3 _baud:=9600
 
 if use Analog pin, use  rangeSensorPW.getRange()
 if use PWM pin, use rangeSensorAD.getRange()
+
+// Electro_sonar_pkg
+by sending Int16 type message 1; the electromagnetic can work to pick up the 
+piazza
