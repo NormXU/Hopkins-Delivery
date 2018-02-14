@@ -12,7 +12,7 @@ sudo apt-get install ros-indigo-rosserial
 sudo chmod 777 /dev/ttyACM0
 
 // set baud Rate = 9600
-rosrun rosserial_python serial_node.py _port:=/dev/ttyACM3 _baud:=9600
+rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0 _baud:=9600
 
 // MaxSonar.ino use Ultra Sonar MB1024. There are two ways to calculate the distance. The minimum of the distance is
 17 cm
@@ -21,5 +21,9 @@ if use Analog pin, use  rangeSensorPW.getRange()
 if use PWM pin, use rangeSensorAD.getRange()
 
 // Electro_sonar_pkg
-by sending Int16 type message 1; the electromagnetic can work to pick up the 
-piazza
+by sending Int16 type message 1; the electromagnetic can work to pick up the piazza
+
+rostopic pub -1 /electromagnetic std_msgs/Int16 1 // open the electromangetics on both sides
+
+PID_Sonar_DroneCtrl.cpp is for Matrix 100 PID sonar control signal
+
