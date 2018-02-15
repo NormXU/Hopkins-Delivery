@@ -43,7 +43,6 @@ struct _pid
 	float err_last_left;              
 	float err_last_right;         
 	float Kp, Kd;        
-	float ycmd;
 }pid;
 
 void PID_INI() // Set PID Parameters
@@ -433,20 +432,20 @@ void sonar_position_ctrl(double l, double r)
 	if (l >= thresh_min && r >= thresh_min) {
 		if (l <= pid.SetDistance) 
 		{
-			pid.ycmd -= pid.Kp * (pid.SetDistance - l) + pid.Kd * (pid.SetDistance - l - pid.err_last_left); 
+			yCmd -= pid.Kp * (pid.SetDistance - l) + pid.Kd * (pid.SetDistance - l - pid.err_last_left);
 			pid.err_last_left = pid.SetDistance - l;
 		}
 		if (r <= pid.SetDistance) 
 		{
-			pid.ycmd += pid.Kp * (pid.SetDistance - r) + pid.Kd * (pid.SetDistance - l - pid.err_last_right);
+			yCmd += pid.Kp * (pid.SetDistance - r) + pid.Kd * (pid.SetDistance - l - pid.err_last_right);
 			pid.err_last_right = pid.SetDistance - r;
 		}
 	}
-	if (l > pid.SetDistance && r > pid.SetDistance) pid.ycmd = 0;
+	if (l < pid.SetDistance || r < pid.SetDistance) yCmd = 0;
 	ROS_INFO("y:%f", yCmd);
 	sensor_msgs::Joy controlPosYaw;
 	controlPosYaw.axes.push_back(0.0);
-	controlPosYaw.axes.push_back(pid.ycmd);
+	controlPosYaw.axes.push_back(yCmd);
 	controlPosYaw.axes.push_back(1.5);
 	controlPosYaw.axes.push_back(0.0);
 	ctrlPosYawPub.publish(controlPosYaw);
