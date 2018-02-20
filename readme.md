@@ -1,4 +1,4 @@
-# Soanr-Based Obstacle Avoidance
+# Sonar-Based Obstacle Avoidance
 
 ## dependent on rosserial library
 sudo apt-get install ros-indigo-rosserial-arduino
@@ -36,5 +36,7 @@ hostname -I //to get ip adress
 At the bottom of bashrc file, add
 export ROS_Master_URI=http://192.168.31.114:11311
 export ROS_IP=192.168.31.114
-[註一] 192.168.31.114是目前TKw連接路由器的IP
-[註二] 11311是連接port
+
+// 192.168.31.114 IP adress
+// 11311 端口
+rqt_plot /controlPosYaw
