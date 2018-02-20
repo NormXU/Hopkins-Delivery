@@ -1,6 +1,6 @@
 # Soanr-Based Obstacle Avoidance
 
-**dependent on rosserial library
+## dependent on rosserial library
 sudo apt-get install ros-indigo-rosserial-arduino
 sudo apt-get install ros-indigo-rosserial
 
