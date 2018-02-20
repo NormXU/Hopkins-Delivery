@@ -14,8 +14,8 @@ sudo chmod 777 /dev/ttyACM0
 ## set baud Rate = 9600
 rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0 _baud:=9600
 
-## MaxSonar.ino use Ultra Sonar MB1024. There are two ways to calculate the distance. The minimum of the distance is
-17 cm
+## MaxSonar.ino use Ultra Sonar MB1024. 
+There are two ways to calculate the distance. The minimum of the distance is 17 cm
 library    git clone https://github.com/Diaoul/arduino-Maxbotix.git
 
 if use Analog pin, use  rangeSensorPW.getRange()
