@@ -1,4 +1,4 @@
-/** @file demo_flight_control.cpp
+ï»¿/** @file demo_flight_control.cpp
 *  @version 3.3
 *  @date September, 2017
 *
@@ -30,7 +30,7 @@ std::vector<double> right_sonar;
 
 double left_sonar_curr = 0.0;
 double right_sonar_curr = 0.0;
-
+double yCmd;
 int num_targets = 0;
 geometry_msgs::PointStamped local_position;
 sensor_msgs::NavSatFix current_gps_position;
@@ -39,20 +39,21 @@ double angle = 0.0;
 
 struct _pid
 {
-	float SetDistance;      
-	float err_last_left;              
-	float err_last_right;         
-	float Kp, Kd;        
+	float SetDistance;
+	float err_last_left;
+	float err_last_right;
+	float Kp, Kd;
+	float K_saturate;
 }pid;
 
 void PID_INI() // Set PID Parameters
 {
-	pid.SetDistance = 1.5;// minimum safe distance
-	pid.Kd = 0.2;  //±ÈÀýµ÷½Ú
-	pid.Kp = 1.8;  //Î¢·Öµ÷½Ú
+	pid.SetDistance = 0.5;// minimum safe distance
+	pid.Kd = 0.6;  
+	pid.Kp = 1.8;  
 	pid.err_last_left = 0;
 	pid.err_last_right = 0;
-	pid.ycmd = 0;
+	pid.K_saturate = 60;
 	ROS_INFO("PID Parameters Initialization Done !");
 }
 int main(int argc, char** argv)
@@ -410,13 +411,13 @@ void sonar_callback(const sensor_msgs::Range::ConstPtr& msg) { // in cm
 		left_sonar.push_back((double)msg->range);
 		if (left_sonar.size() >= wsize) left_sonar.erase(left_sonar.begin());
 		left_sonar_curr = std::accumulate(left_sonar.begin(), left_sonar.end(), 0) / left_sonar.size();
-		ROS_INFO("lll:%f", left_sonar_curr);
+		//ROS_INFO("lll:%f", left_sonar_curr);
 	}
 	else if (msg->header.frame_id == "/ultrasound2") {
 		right_sonar.push_back((double)msg->range);
 		if (right_sonar.size() >= wsize) right_sonar.erase(right_sonar.begin());
 		right_sonar_curr = std::accumulate(right_sonar.begin(), right_sonar.end(), 0) / right_sonar.size();
-		ROS_INFO("rrr:%f", right_sonar_curr);
+		//ROS_INFO("rrr:%f", right_sonar_curr);
 	}
 	sonar_position_ctrl(left_sonar_curr, right_sonar_curr);
 }
@@ -427,21 +428,30 @@ void sonar_position_ctrl(double l, double r)
 	l = l / 100.0;
 	r = r / 100.0;
 
-	double thresh_min = 0.2;
-	//double yCmd = 0.0;
-	if (l >= thresh_min && r >= thresh_min) {
-		if (l <= pid.SetDistance) 
+	//double yCmd = 0.0
+	if (l <= pid.SetDistance)
+	{
+		if (-yCmd <= pid.K_saturate)
 		{
-			yCmd -= pid.Kp * (pid.SetDistance - l) + pid.Kd * (pid.SetDistance - l - pid.err_last_left);
+			yCmd -= (pid.Kp * (pid.SetDistance - l) + pid.Kd * (pid.SetDistance - l - pid.err_last_left));
 			pid.err_last_left = pid.SetDistance - l;
 		}
-		if (r <= pid.SetDistance) 
+
+	}
+	if (r <= pid.SetDistance)
+	{
+		if (yCmd <= pid.K_saturate)
 		{
-			yCmd += pid.Kp * (pid.SetDistance - r) + pid.Kd * (pid.SetDistance - l - pid.err_last_right);
+			yCmd += (pid.Kp * (pid.SetDistance - r) + pid.Kd * (pid.SetDistance - r - pid.err_last_right));
 			pid.err_last_right = pid.SetDistance - r;
 		}
 	}
-	if (l < pid.SetDistance || r < pid.SetDistance) yCmd = 0;
+
+	if (l > pid.SetDistance && r > pid.SetDistance) { yCmd = 0.0; pid.err_last_left = 0.0; pid.err_last_right = 0.0; }
+	ROS_INFO("l:%f", l);
+	ROS_INFO("LAST_left:%f", pid.err_last_left);
+	ROS_INFO("r:%f", r);
+	ROS_INFO("LAST_right:%f", pid.err_last_right);
 	ROS_INFO("y:%f", yCmd);
 	sensor_msgs::Joy controlPosYaw;
 	controlPosYaw.axes.push_back(0.0);
