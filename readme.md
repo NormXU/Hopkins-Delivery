@@ -29,7 +29,7 @@ if use PWM pin, use rangeSensorAD.getRange()
 ## Electro_sonar_pkg
 by sending Int16 type message 1; the electromagnetic can work to pick up the piazza
 
-rostopic pub -1 /electromagnetic std_msgs/Int16 1 // open the electromangetics on both sides
+**rostopic pub -1 /electromagnetic std_msgs/Int16 1** // open the electromangetics on both sides
 
 PID_Sonar_DroneCtrl.cpp is for Matrix 100 PID sonar control signal
 
