@@ -50,3 +50,19 @@ export ROS_IP=192.168.31.114
 // 11311 端口
 
 rqt_plot /controlPosYaw
+
+# Apriltag Landing
+roslaunch usb_cam usb_cam-test.launch   
+ 
+roslaunch apriltags apriltags.launch   
+
+roslaunch dji_sdk sdk.launch         
+
+roslaunch hd_landing position_track.launch
+
+roslaunch hd_landing wtf.launch     **Run this only when wtf.launch is not included into position_track.launch **
+
+## For Landing Flag
+rostopic pub -1 /hd/position_track/position_track_enable std_msgs/Bool true
+
+rostopic pub -1 /hd/position_track/landing_enable std_msgs/Bool true
