@@ -60,7 +60,7 @@ roslaunch dji_sdk sdk.launch
 
 roslaunch hd_landing position_track.launch
 
-roslaunch hd_landing wtf.launch     **Run this only when wtf.launch is not included into position_track.launch **
+roslaunch hd_landing wtf.launch     *Run this only when wtf.launch is not included into position_track.launch*
 
 ## For Landing Flag
 rostopic pub -1 /hd/position_track/position_track_enable std_msgs/Bool true
