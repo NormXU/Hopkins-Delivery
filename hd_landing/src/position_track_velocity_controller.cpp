@@ -263,6 +263,7 @@ std::cout << "Finally, I come here ! " << std::endl;
 				 //controlPosYaw.axes.push_back(descending_speed);
 				 //controlPosYaw.axes.push_back(velocity_control_effort_yaw);
 				 //ctrlPosYawPub.publish(controlPosYaw);
+				controlVelDesCondition.axes.clear();
 				uint8_t flag = (DJISDK::VERTICAL_VELOCITY   |
                 DJISDK::HORIZONTAL_VELOCITY |
                 DJISDK::YAW_RATE            |
@@ -311,7 +312,7 @@ std::cout << "Finally, I come here ! " << std::endl;
 				// controlPosYaw.axes.push_back(ascending_speed);
 				// controlPosYaw.axes.push_back(velocity_control_effort_yaw);
 				// ctrlPosYawPub.publish(controlPosYaw);
-				
+				controlVelYawRate.axes.clear();
 				uint8_t flag = (DJISDK::VERTICAL_VELOCITY   |
                 DJISDK::HORIZONTAL_VELOCITY |
                 DJISDK::YAW_RATE            |
@@ -346,7 +347,8 @@ std::cout << "Finally, I come here ! " << std::endl;
 				// controlPosYaw.axes.push_back(0.0);
 				// controlPosYaw.axes.push_back(velocity_control_effort_yaw);
 				// ctrlPosYawPub.publish(controlPosYaw);
-				std::cout << "shaking ?? " << std::endl;
+				std::cout << "tracking ?? " << std::endl;
+				controlVelYawRate.axes.clear();
 				uint8_t flag = (DJISDK::VERTICAL_VELOCITY   |
                 DJISDK::HORIZONTAL_VELOCITY |
                 DJISDK::YAW_RATE            |
