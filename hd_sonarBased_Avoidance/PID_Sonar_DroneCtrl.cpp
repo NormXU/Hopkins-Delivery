@@ -11,7 +11,7 @@
 
 #include "dji_sdk_demo/demo_local_position_control.h"
 #include "dji_sdk/dji_sdk.h"
-
+#include <vector>
 ros::ServiceClient set_local_pos_reference;
 ros::ServiceClient sdk_ctrl_authority_service;
 ros::ServiceClient drone_task_service;
@@ -27,10 +27,15 @@ uint8_t current_gps_health = 0;
 const int wsize = 10;
 std::vector<double> left_sonar;
 std::vector<double> right_sonar;
+std::vector<double> forward_sonar;
+std::vector<double> backward_sonar;
 
 double left_sonar_curr = 0.0;
 double right_sonar_curr = 0.0;
+double forward_sonar_curr = 0.0;
+double backward_sonar_curr = 0.0;
 double yCmd;
+double xCmd;
 int num_targets = 0;
 geometry_msgs::PointStamped local_position;
 sensor_msgs::NavSatFix current_gps_position;
@@ -42,6 +47,8 @@ struct _pid
 	float SetDistance;
 	float err_last_left;
 	float err_last_right;
+	float err_last_forward;
+	float err_last_backward;
 	float Kp, Kd;
 	float K_saturate;
 }pid;
@@ -53,7 +60,9 @@ void PID_INI() // Set PID Parameters
 	pid.Kp = 1.8;  
 	pid.err_last_left = 0;
 	pid.err_last_right = 0;
-	pid.K_saturate = 60;
+	pid.err_last_forward = 0;
+	pid.err_last_backward = 0;
+	pid.K_saturate = 20;
 	ROS_INFO("PID Parameters Initialization Done !");
 }
 int main(int argc, char** argv)
@@ -407,27 +416,41 @@ bool set_local_position()
 
 void sonar_callback(const sensor_msgs::Range::ConstPtr& msg) { // in cm
 	if (msg->range < msg->min_range || msg->range > msg->max_range) return;
+
 	if (msg->header.frame_id == "/ultrasound1") {
 		left_sonar.push_back((double)msg->range);
 		if (left_sonar.size() >= wsize) left_sonar.erase(left_sonar.begin());
 		left_sonar_curr = std::accumulate(left_sonar.begin(), left_sonar.end(), 0) / left_sonar.size();
 		//ROS_INFO("lll:%f", left_sonar_curr);
 	}
-	else if (msg->header.frame_id == "/ultrasound2") {
+	if (msg->header.frame_id == "/ultrasound2") {
 		right_sonar.push_back((double)msg->range);
 		if (right_sonar.size() >= wsize) right_sonar.erase(right_sonar.begin());
 		right_sonar_curr = std::accumulate(right_sonar.begin(), right_sonar.end(), 0) / right_sonar.size();
 		//ROS_INFO("rrr:%f", right_sonar_curr);
 	}
-	sonar_position_ctrl(left_sonar_curr, right_sonar_curr);
+	if (msg->header.frame_id == "/ultrasound3") {
+		forward_sonar.push_back((double)msg->range);
+		if (forward_sonar.size() >= wsize) forward_sonar.erase(forward_sonar.begin());
+		forward_sonar_curr = std::accumulate(forward_sonar.begin(), forward_sonar.end(), 0) / forward_sonar.size();
+		//ROS_INFO("rrr:%f", right_sonar_curr);
+	}
+	if (msg->header.frame_id == "/ultrasound2") {
+		backward_sonar.push_back((double)msg->range);
+		if (backward_sonar.size() >= wsize) backward_sonar.erase(backward_sonar.begin());
+		backward_sonar_curr = std::accumulate(backward_sonar.begin(), backward_sonar.end(), 0) / backward_sonar.size();
+		//ROS_INFO("rrr:%f", right_sonar_curr);
+	}
+	sonar_position_ctrl(left_sonar_curr, right_sonar_curr, forward_sonar_curr, backward_sonar_curr);
 }
 
 
-void sonar_position_ctrl(double l, double r)
+void sonar_position_ctrl(double l, double r, double f, double b)
 { //cm to m
 	l = l / 100.0;
 	r = r / 100.0;
-
+	f = f / 100.0;
+	b = b / 100.0;
 	//double yCmd = 0.0
 	if (l <= pid.SetDistance)
 	{
@@ -446,15 +469,38 @@ void sonar_position_ctrl(double l, double r)
 			pid.err_last_right = pid.SetDistance - r;
 		}
 	}
+	if (f <= pid.SetDistance)
+	{
+		if (-xCmd <= pid.K_saturate)
+		{
+			xCmd -= (pid.Kp * (pid.SetDistance - f) + pid.Kd * (pid.SetDistance - f - pid.err_last_forward));
+			pid.err_last_forward = pid.SetDistance - f;
+		}
 
+	}
+	if (b <= pid.SetDistance)
+	{
+		if (xCmd <= pid.K_saturate)
+		{
+			xCmd += (pid.Kp * (pid.SetDistance - b) + pid.Kd * (pid.SetDistance - b - pid.err_last_backward));
+			pid.err_last_backward = pid.SetDistance - b;
+		}
+	}
 	if (l > pid.SetDistance && r > pid.SetDistance) { yCmd = 0.0; pid.err_last_left = 0.0; pid.err_last_right = 0.0; }
+	if (f > pid.SetDistance && b > pid.SetDistance) { xCmd = 0.0; pid.err_last_backward = 0.0; pid.err_last_forward = 0.0; }
 	ROS_INFO("l:%f", l);
 	ROS_INFO("LAST_left:%f", pid.err_last_left);
 	ROS_INFO("r:%f", r);
 	ROS_INFO("LAST_right:%f", pid.err_last_right);
 	ROS_INFO("y:%f", yCmd);
+	ROS_INFO("f:%f", f);
+	ROS_INFO("LAST_forward:%f", pid.err_last_forward);
+	ROS_INFO("b:%f", b);
+	ROS_INFO("LAST_backward:%f", pid.err_last_backward);
+	ROS_INFO("y:%f", xCmd);
 	sensor_msgs::Joy controlPosYaw;
-	controlPosYaw.axes.push_back(0.0);
+	controlPosYaw.axes.clear();
+	controlPosYaw.axes.push_back(xCmd);
 	controlPosYaw.axes.push_back(yCmd);
 	controlPosYaw.axes.push_back(1.5);
 	controlPosYaw.axes.push_back(0.0);

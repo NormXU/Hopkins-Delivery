@@ -273,7 +273,7 @@ std::cout << "Finally, I come here ! " << std::endl;
 				//controlVelYawRate.axes.push_back(velocity_control_effort_x);
 				//controlVelYawRate.axes.push_back(velocity_control_effort_y);
 				std::cout << "flag " << flag << std::endl;
-                                controlVelDesCondition.axes.push_back(0.0);
+                controlVelDesCondition.axes.push_back(0.0);
 				controlVelDesCondition.axes.push_back(0.0);
 				controlVelDesCondition.axes.push_back(descending_speed);
 				controlVelDesCondition.axes.push_back(velocity_control_effort_yaw);
