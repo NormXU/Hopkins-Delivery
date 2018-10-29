@@ -1,3 +1,10 @@
+# Hopkins Delivery
+
+![ProcessKim](https://github.com/NormXU/Hopkins-Delivery/tree/master/Doc/hopkins_delivers_design_day_2018_poster.jpg)
+
+
+
+
 # Sonar-Based Obstacle Avoidance
 
 ## dependent on rosserial library
