@@ -1,6 +1,6 @@
 # Hopkins Delivery
 
-![ProcessKim](https://github.com/NormXU/Hopkins-Delivery/tree/master/Doc/hopkins_delivers_design_day_2018_poster.jpg)
+![DesignDay](https://github.com/NormXU/Hopkins-Delivery/blob/master/Doc/hopkins_delivers_design_day_2018_poster.jpg)
 
 
 
