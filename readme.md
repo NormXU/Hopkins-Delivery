@@ -3,7 +3,8 @@
 ![DesignDay](https://github.com/NormXU/Hopkins-Delivery/blob/master/Doc/hopkins_delivers_design_day_2018_poster.jpg)
 
 
-
+[Demo Video](https://vimeo.com/256362144)
+--------------------------
 
 # Sonar-Based Obstacle Avoidance
 
